@@ -1,0 +1,131 @@
+﻿<UserControl x:Class="Task.Views.EmployeeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Task.Views"
+             xmlns:vms = "clr-namespace:Task.ViewModels"
+             xmlns:dir = "clr-namespace:Task"
+             xmlns:models = "clr-namespace:Task.Models"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <vms:EmployeeViewModel/>
+    </UserControl.DataContext>
+    
+    <UserControl.Resources>
+        <Style TargetType="TextBlock" x:Key="StandartTextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="TextBox" x:Key="StandartTextBox">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="ComboBox" x:Key="StandartComboBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style x:Key="DataGridCellCentered" TargetType="DataGridCell">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="DataGridCellCenteredColored" TargetType="DataGridCell">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Background" Value="AliceBlue"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="DataGridHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <ObjectDataProvider x:Key="GetEnumGenders"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="dir:Gender" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <vms:EmployeeViewModel x:Key="viewModel"/>
+
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.6*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Удалить" Height="25" Width="100" 
+                    Command="{Binding RemoveSelectedCommand}" FontSize="15" Margin="5 0"/>
+                <Button Content="Сохранить" Height="25" Width="100" ToolTip="Сохраняет изменения в базу" 
+                    Command="{Binding SaveCommand}" FontSize="15" Margin="5 0"/>
+                <Button Content="Добавить" Height="25" Width="100"
+                    Command="{Binding AddCommand}" FontSize="15" Margin="5 0"/>
+            </StackPanel>
+        </Grid>
+        <DataGrid AutoGenerateColumns="False" Name="mainGrid" ItemsSource="{Binding Elements}" CanUserAddRows="False"
+            SelectedItem="{Binding SelectedElement}" Grid.Row="1" ColumnHeaderStyle="{StaticResource DataGridHeader}"
+                      CellStyle="{StaticResource DataGridCellCentered}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=LastName}"
+                        MinWidth="125" Width="*"/>
+                <DataGridTextColumn Header="Имя"  Binding="{Binding Path=FirstName}"
+                        MinWidth="100" Width="*"/>
+                <DataGridTextColumn Header="Отчество" Binding="{Binding Path=Patronymic}"
+                        MinWidth="125" Width="*"/>
+                <DataGridTextColumn Header="Дата рождения" 
+                        Binding="{Binding Path=BirthDate, StringFormat={}{0:dd/MM/yyyy}}"
+                        MinWidth="125" Width="*"/>
+                <DataGridTextColumn Header="Пол" Binding="{Binding Path=Gender}"
+                        IsReadOnly="True" MinWidth="50" Width="0.5*" 
+                        CellStyle="{StaticResource DataGridCellCenteredColored}"/>
+                <DataGridTextColumn Header="Подразделение" Binding="{Binding Path=Branch.Name}"
+                        MinWidth="125" Width="*" IsReadOnly="True"
+                        CellStyle="{StaticResource DataGridCellCenteredColored}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="2" DataContext="{Binding ElementName=mainGrid, Path=SelectedItem}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="ID работника" Style="{StaticResource StandartTextBlock}"/>
+            <TextBox Grid.Column="1" Text="{Binding Path=Id}" 
+                     Style="{StaticResource StandartTextBox}" Width="150"/>
+            <TextBlock Grid.Row="1" Text="Пол" Style="{StaticResource StandartTextBlock}"/>
+            <ComboBox Grid.Column="1" Grid.Row="1" Style="{StaticResource StandartComboBox}"
+                      SelectedItem="{Binding Gender}"
+                      ItemsSource = "{Binding Source={StaticResource GetEnumGenders}}"/>
+            <TextBlock Grid.Row="2" Text="Подразделение" Style="{StaticResource StandartTextBlock}"/>
+            <ComboBox Grid.Column="1" Grid.Row="2" Style="{StaticResource StandartComboBox}"
+                DisplayMemberPath="Name" IsEditable="True"
+                      SelectedValuePath="Id"
+                SelectedValue="{Binding BranchId}"
+                ItemsSource="{Binding Source={StaticResource viewModel}, Path=Branches}" />
+        </Grid>
+    </Grid>
+</UserControl>
